@@ -19,11 +19,12 @@ class FrozenObject : public jsi::HostObject {
   
   private:
   std::unordered_map<std::string, std::shared_ptr<ShareableValue>> map;
+  int customThreadId;
 
   public:
 
-  FrozenObject(jsi::Runtime &rt, const jsi::Object &object, NativeReanimatedModule *module);
-  jsi::Object shallowClone(jsi::Runtime &rt);
+  FrozenObject(jsi::Runtime &rt, const jsi::Object &object, NativeReanimatedModule *module, const int customThreadId = -1);
+  jsi::Object shallowClone(jsi::Runtime &rt, const int customThreadId = -1);
 };
 
 }

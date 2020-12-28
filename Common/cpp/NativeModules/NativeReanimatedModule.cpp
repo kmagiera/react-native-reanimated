@@ -10,6 +10,7 @@
 #include "FrozenObject.h"
 #include <functional>
 #include <thread>
+#include <future>
 #include <memory>
 #include "JSIStoreValueUser.h"
 
@@ -61,7 +62,8 @@ NativeReanimatedModule::NativeReanimatedModule(std::shared_ptr<CallInvoker> jsIn
                                                std::unique_ptr<jsi::Runtime> rt,
                                                std::shared_ptr<ErrorHandler> errorHandler,
                                                std::function<jsi::Value(jsi::Runtime &, const int, const jsi::String &)> propObtainer,
-                                               PlatformDepMethodsHolder platformDepMethodsHolder) : NativeReanimatedModuleSpec(jsInvoker),
+                                               PlatformDepMethodsHolder platformDepMethodsHolder,
+                                               std::function<std::unique_ptr<jsi::Runtime>()> runtimeObtainer) : NativeReanimatedModuleSpec(jsInvoker),
                                                   runtime(std::move(rt)),
                                                   mapperRegistry(new MapperRegistry()),
                                                   eventHandlerRegistry(new EventHandlerRegistry()),
@@ -69,14 +71,15 @@ NativeReanimatedModule::NativeReanimatedModule(std::shared_ptr<CallInvoker> jsIn
                                                   propObtainer(propObtainer),
                                                   errorHandler(errorHandler),
                                                   workletsCache(new WorkletsCache()),
-                                                  scheduler(scheduler)
+                                                  scheduler(scheduler),
+                                                  runtimeObtainer(runtimeObtainer)
 {
   auto requestAnimationFrame = [=](FrameCallback callback) {
     frameCallbacks.push_back(callback);
     maybeRequestRender();
   };
 
-  RuntimeDecorator::addNativeObjects(*runtime,
+  RuntimeDecorator::decorateUI(*runtime,
                                      platformDepMethodsHolder.updaterFunction,
                                      requestAnimationFrame,
                                      platformDepMethodsHolder.scrollToFunction,
@@ -187,6 +190,46 @@ jsi::Value NativeReanimatedModule::getViewProp(jsi::Runtime &rt, const jsi::Valu
     });
   });
 
+  return jsi::Value::undefined();
+}
+
+jsi::Value NativeReanimatedModule::spawnThread(jsi::Runtime &rt, const jsi::Value &operations) {
+  jsi::Object object = operations.asObject(rt);
+
+  if (!object.isFunction(rt) || object.getProperty(rt, "__worklet").isUndefined()) {
+    errorHandler->setError("Function passed to spawnThread doesn't seem to be a worklet");
+    errorHandler->raise();
+    return jsi::Value::undefined();
+  }
+
+  const int threadId = ++this->currentThreadId;
+
+  std::shared_ptr<ShareableValue> workletShareable = ShareableValue::adapt(rt, operations, this, ValueType::UndefinedType, threadId);
+
+  std::shared_ptr<Th> th = std::make_shared<Th>();
+  this->threads.insert(std::make_pair(threadId, th));
+
+  auto job = [=]() {
+    std::unique_ptr<jsi::Runtime> customRuntime = runtimeObtainer();
+    std::shared_ptr<Th> th = this->threads.at(threadId);
+    th->rt = std::move(customRuntime);
+    RuntimeDecorator::decorateCustomThread(*th->rt);
+    jsi::Value result = jsi::Value::undefined();
+
+    jsi::Function func = workletShareable->getValue(*th->rt, threadId).asObject(*th->rt).asFunction(*th->rt);
+    std::shared_ptr<jsi::Function> funcPtr = std::make_shared<jsi::Function>(std::move(func));
+    try {
+      result = funcPtr->callWithThis(*th->rt, *funcPtr);
+    }
+    catch (std::exception &e) {
+      std::string str = e.what();
+      errorHandler->setError(str);
+      errorHandler->raise();
+    }
+    return result;
+  };
+
+  threads.at(threadId)->thread = std::make_shared<std::thread>(job);
   return jsi::Value::undefined();
 }
 
