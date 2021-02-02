@@ -1,12 +1,12 @@
-/* global _WORKLET _getCurrentTime _frameTimestamp _eventTimestamp, _setGlobalConsole */
+/* global _WORKLET _frameTimestamp _setGlobalConsole */
 
-import NativeReanimated from './NativeReanimated';
-import { Platform } from 'react-native';
+import {
+  NativeReanimated,
+  getTimestamp,
+  requestFrame,
+  installCoreFunctions,
+} from './platform-specific/PlatformSpecific';
 import { addWhitelistedNativeProps } from '../ConfigHelper';
-
-global.__reanimatedWorkletInit = function(worklet) {
-  worklet.__worklet = true;
-};
 
 function _toArrayReanimated(object) {
   'worklet';
@@ -44,19 +44,6 @@ global.__reanimatedWorkletInit = function(worklet) {
   }
 };
 
-function pushFrame(frame) {
-  NativeReanimated.pushFrame(frame);
-}
-
-export function requestFrame(frame) {
-  'worklet';
-  if (NativeReanimated.native) {
-    requestAnimationFrame(frame);
-  } else {
-    pushFrame(frame);
-  }
-}
-
 global._WORKLET = false;
 global._log = function(s) {
   console.log(s);
@@ -80,25 +67,6 @@ export function getViewProp(viewTag, propName) {
       }
     });
   });
-}
-
-function _getTimestamp() {
-  'worklet';
-  if (_frameTimestamp) {
-    return _frameTimestamp;
-  }
-  if (_eventTimestamp) {
-    return _eventTimestamp;
-  }
-  return _getCurrentTime();
-}
-
-export function getTimestamp() {
-  'worklet';
-  if (Platform.OS === 'web') {
-    return NativeReanimated.getTimestamp();
-  }
-  return _getTimestamp();
 }
 
 function workletValueSetter(value) {
@@ -202,9 +170,8 @@ function workletValueSetterJS(value) {
   }
 }
 
-NativeReanimated.installCoreFunctions(
-  NativeReanimated.native ? workletValueSetter : workletValueSetterJS
-);
+// todo move those functions to platform specific files as well if possible
+installCoreFunctions(workletValueSetter, workletValueSetterJS);
 
 export function makeMutable(value) {
   return NativeReanimated.makeMutable(value);
