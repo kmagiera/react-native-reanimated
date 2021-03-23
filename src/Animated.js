@@ -7,15 +7,10 @@ import AnimatedCode from './core/AnimatedCode';
 import * as base from './base';
 import * as derived from './derived';
 import createAnimatedComponent from './createAnimatedComponent';
-import decay from './animations/decay';
-import timing from './animations/timing';
-import spring from './animations/spring';
-import Animation from './animations/Animation';
 import {
   addWhitelistedNativeProps,
   addWhitelistedUIProps,
 } from './ConfigHelper';
-import backwardCompatibleAnimWrapper from './animations/backwardCompatibleAnimWrapper';
 import {
   Transition,
   Transitioning,
@@ -24,70 +19,77 @@ import {
 import SpringUtils from './animations/SpringUtils';
 import useValue from './useValue';
 
-const decayWrapper = backwardCompatibleAnimWrapper(
-  decay,
-  Animation.decayDefaultState
-);
-const timingWrapper = backwardCompatibleAnimWrapper(
-  timing,
-  Animation.timingDefaultState
-);
-const springWrapper = backwardCompatibleAnimWrapper(
-  spring,
-  Animation.springDefaultState
-);
-const Animated = {
-  // components
-  View: createAnimatedComponent(View),
-  Text: createAnimatedComponent(Text),
-  Image: createAnimatedComponent(Image),
-  ScrollView: createAnimatedComponent(ScrollView),
-  Code: AnimatedCode,
-  createAnimatedComponent,
+module.exports = {
+  __esModule: true,
+  default: {
+    // components
+    View: createAnimatedComponent(View),
+    Text: createAnimatedComponent(Text),
+    Image: createAnimatedComponent(Image),
+    ScrollView: createAnimatedComponent(ScrollView),
+    Code: AnimatedCode,
+    createAnimatedComponent,
+
+    // classes
+    Clock: AnimatedClock,
+    Value: AnimatedValue,
+    Node: AnimatedNode,
+
+    // animations
+    get decay() {
+      return require('./animations/decay').default;
+    },
+    get timing() {
+      return require('./animations/timing').default;
+    },
+    get spring() {
+      return require('./animations/spring').default;
+    },
+    SpringUtils,
+
+    // configuration
+    addWhitelistedNativeProps,
+    addWhitelistedUIProps,
+
+    // hooks
+    useValue,
+  },
+
+  // other
+  Easing,
+  Transitioning,
+  Transition,
+  createTransitioningComponent,
 
   // classes
   Clock: AnimatedClock,
   Value: AnimatedValue,
   Node: AnimatedNode,
 
-  // operations
-  ...base,
-  ...derived,
-
   // animations
-  decay: decayWrapper,
-  timing: timingWrapper,
-  spring: springWrapper,
+  get decay() {
+    return require('./animations/decay').default;
+  },
+  get timing() {
+    return require('./animations/timing').default;
+  },
+  get spring() {
+    return require('./animations/spring').default;
+  },
   SpringUtils,
-
-  // configuration
-  addWhitelistedNativeProps,
-  addWhitelistedUIProps,
 
   // hooks
   useValue,
 };
 
-export default Animated;
+// NOTE: DO NOT use `...foo`, because it will cause getters to be evaluated, breaking lazy exports
 
-// operations
-export * from './base';
-export * from './derived';
+for (const op in base) {
+  module.exports[op] = base[op];
+  module.exports.default[op] = base[op];
+}
 
-export {
-  Easing,
-  Transitioning,
-  Transition,
-  createTransitioningComponent,
-  // classes
-  AnimatedClock as Clock,
-  AnimatedValue as Value,
-  AnimatedNode as Node,
-  // animations
-  decayWrapper as decay,
-  timingWrapper as timing,
-  springWrapper as spring,
-  SpringUtils,
-  // hooks
-  useValue,
-};
+for (const op in derived) {
+  module.exports[op] = derived[op];
+  module.exports.default[op] = derived[op];
+}
