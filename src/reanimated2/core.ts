@@ -308,5 +308,8 @@ if (!NativeReanimated.useOnlyV1) {
         info: runOnJS(capturableConsole.info),
       };
       _setGlobalConsole(console);
+      global.performance = {
+        now: global._chronoNow,
+      };
     })();
 }
