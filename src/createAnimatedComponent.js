@@ -20,6 +20,10 @@ function listener(data) {
   component && component._updateFromNative(data.props);
 }
 
+const platformProps = Platform.select({
+  web: {},
+  default: { collapsable: false },
+});
 function dummyListener() {
   // empty listener we use to assign to listener properties for which animated
   // event is used.
@@ -104,18 +108,24 @@ export default function createAnimatedComponent(Component) {
 
     _attachNativeEvents() {
       const node = this._getEventViewRef();
+      const nativeUpdate = {};
       const viewTag = findNodeHandle(node);
 
       for (const key in this.props) {
         const prop = this.props[key];
         if (prop instanceof AnimatedEvent) {
           prop.attachEvent(node, key);
+          nativeUpdate[key] = true;
         } else if (
           prop?.current &&
           prop.current instanceof WorkletEventHandler
         ) {
           prop.current.registerForEvents(viewTag, key);
         }
+      }
+
+      if (Object.keys(nativeUpdate).length > 0) {
+        this.setNativeProps(nativeUpdate);
       }
     }
 
@@ -139,6 +149,7 @@ export default function createAnimatedComponent(Component) {
       const node = this._getEventViewRef();
       const attached = new Set();
       const nextEvts = new Set();
+      const nativeUpdate = {};
       let viewTag;
 
       for (const key in this.props) {
@@ -160,6 +171,7 @@ export default function createAnimatedComponent(Component) {
           if (!nextEvts.has(prop.__nodeID)) {
             // event was in prev props but not in current props, we detach
             prop.detachEvent(node, key);
+            nativeUpdate[key] = false;
           } else {
             // event was in prev and is still in current props
             attached.add(prop.__nodeID);
@@ -178,6 +190,7 @@ export default function createAnimatedComponent(Component) {
         if (prop instanceof AnimatedEvent && !attached.has(prop.__nodeID)) {
           // not yet attached
           prop.attachEvent(node, key);
+          nativeUpdate[key] = true;
         } else if (
           prop?.current &&
           prop.current instanceof WorkletEventHandler &&
@@ -186,6 +199,10 @@ export default function createAnimatedComponent(Component) {
           prop.current.registerForEvents(viewTag, key);
           prop.current.reattachNeeded = false;
         }
+      }
+
+      if (Object.keys(nativeUpdate).length > 0) {
+        this.setNativeProps(nativeUpdate);
       }
     }
 
@@ -435,11 +452,6 @@ export default function createAnimatedComponent(Component) {
       if (process.env.JEST_WORKER_ID) {
         props.animatedStyle = this.animatedStyle;
       }
-
-      const platformProps = Platform.select({
-        web: {},
-        default: { collapsable: false },
-      });
       return (
         <Component {...props} ref={this._setComponentRef} {...platformProps} />
       );
