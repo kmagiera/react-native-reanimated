@@ -217,7 +217,7 @@ export class SlideOutDown
             animation(values.originY + height, config)
           ),
         },
-        initialValues: {},
+        initialValues: { originY: values.originY },
       };
     };
   };
