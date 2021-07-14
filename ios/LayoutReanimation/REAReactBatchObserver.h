@@ -8,12 +8,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface REAReactBatchObserver : NSObject <RCTUIManagerObserver>
 
-@property (nullable) REAAnimationsManager* animationsManager;
+@property (nullable) REAAnimationsManager *animationsManager;
 
-- (void) invalidate;
-- (instancetype)initWithBridge:(RCTBridge*)bridge;
+- (void)invalidate;
+- (instancetype)initWithBridge:(RCTBridge *)bridge;
 
-+ (NSMutableSet<NSNumber*>*) animationRootsTags;
++ (NSMutableSet<NSNumber *> *)animationRootsTags;
 
 @end
 

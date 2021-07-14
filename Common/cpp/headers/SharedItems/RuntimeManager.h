@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ShareableValue.h"
-#include "ErrorHandler.h"
-#include "Scheduler.h"
-#include "WorkletsCache.h"
-#include "RuntimeDecorator.h"
 #include <jsi/jsi.h>
 #include <memory>
+#include "ErrorHandler.h"
+#include "RuntimeDecorator.h"
+#include "Scheduler.h"
+#include "ShareableValue.h"
+#include "WorkletsCache.h"
 
 namespace reanimated {
 
@@ -16,24 +16,23 @@ using namespace facebook;
  A class that manages a jsi::Runtime apart from the React-JS runtime.
  */
 class RuntimeManager {
-public:
+ public:
   RuntimeManager(
-    std::shared_ptr<jsi::Runtime> runtime,
-    std::shared_ptr<ErrorHandler> errorHandler,
-    std::shared_ptr<Scheduler> scheduler,
-    RuntimeType runtimeType = RuntimeType::Worklet
-  ) : 
-    runtime(runtime), 
-    errorHandler(errorHandler), 
-    scheduler(scheduler), 
-    workletsCache(std::make_unique<WorkletsCache>()) 
-  { 
+      std::shared_ptr<jsi::Runtime> runtime,
+      std::shared_ptr<ErrorHandler> errorHandler,
+      std::shared_ptr<Scheduler> scheduler,
+      RuntimeType runtimeType = RuntimeType::Worklet)
+      : runtime(runtime),
+        errorHandler(errorHandler),
+        scheduler(scheduler),
+        workletsCache(std::make_unique<WorkletsCache>()) {
     RuntimeDecorator::registerRuntime(this->runtime.get(), runtimeType);
   }
-public:
+
+ public:
   /**
-   Holds the jsi::Function worklet that is responsible for updating values in JS.
-   Can be null.
+   Holds the jsi::Function worklet that is responsible for updating values in
+   JS. Can be null.
    */
   std::shared_ptr<ShareableValue> valueSetter;
   /**
@@ -45,13 +44,15 @@ public:
    */
   std::shared_ptr<ErrorHandler> errorHandler;
   /**
-   Holds the Scheduler that is responsible for scheduling work on the UI- or React-JS Thread.
+   Holds the Scheduler that is responsible for scheduling work on the UI- or
+   React-JS Thread.
    */
   std::shared_ptr<Scheduler> scheduler;
   /**
-   Holds a list of adapted Worklets which are cached to avoid unneccessary recreation.
+   Holds a list of adapted Worklets which are cached to avoid unneccessary
+   recreation.
    */
   std::unique_ptr<WorkletsCache> workletsCache;
 };
 
-}
+} // namespace reanimated

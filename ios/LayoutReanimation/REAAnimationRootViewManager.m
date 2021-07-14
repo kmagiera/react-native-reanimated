@@ -1,7 +1,7 @@
 #import "REAAnimationRootViewManager.h"
-#import "REAAnimationRootView.h"
 #import <React/RCTViewManager.h>
 #import "RCTShadowView.h"
+#import "REAAnimationRootView.h"
 #import "REAReactBatchObserver.h"
 
 @interface REAShadowView : RCTShadowView
@@ -9,20 +9,20 @@
 @end
 
 @implementation REAShadowView {
-    NSNumber* _tag;
+  NSNumber *_tag;
 }
 
 @synthesize reactTag = _tag;
 
-- (NSNumber*)reactTag
+- (NSNumber *)reactTag
 {
-    return _tag;
+  return _tag;
 }
 
-- (void)setReactTag:(NSNumber*)reactTag
+- (void)setReactTag:(NSNumber *)reactTag
 {
-    _tag = reactTag;
-    [[REAReactBatchObserver animationRootsTags] addObject:reactTag];
+  _tag = reactTag;
+  [[REAReactBatchObserver animationRootsTags] addObject:reactTag];
 }
 
 @end
@@ -33,17 +33,17 @@ RCT_EXPORT_MODULE(REALayoutView)
 
 - (UIView *)view
 {
-    return [REAAnimationRootView new];
+  return [REAAnimationRootView new];
 }
 
-- (RCTShadowView*)shadowView
+- (RCTShadowView *)shadowView
 {
-    return [REAShadowView new];
+  return [REAShadowView new];
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(animated, BOOL, REAAnimationRootView)
 {
-    view.shouldBeAnimated = [RCTConvert BOOL:json];
+  view.shouldBeAnimated = [RCTConvert BOOL:json];
 }
 
 @end

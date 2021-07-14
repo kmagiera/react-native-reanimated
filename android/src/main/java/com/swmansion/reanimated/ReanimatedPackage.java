@@ -5,7 +5,6 @@ import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 import com.swmansion.reanimated.layoutReanimation.AnimatedRootManager;
-
 import java.util.Arrays;
 import java.util.List;
 

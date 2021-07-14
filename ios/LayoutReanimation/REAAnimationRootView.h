@@ -5,7 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface REAAnimationRootView : UIView
 
 @property BOOL shouldBeAnimated;
-@property NSSet* capturablePropeties;
+@property NSSet *capturablePropeties;
 
 @end
 

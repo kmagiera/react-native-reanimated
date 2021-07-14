@@ -5,8 +5,8 @@
 #import <React/RCTUIManagerObserverCoordinator.h>
 #import <React/RCTUIManagerUtils.h>
 
-#import "REAValueNode.h"
 #import "REAReactBatchObserver.h"
+#import "REAValueNode.h"
 
 extern RCTBridge *_bridge_reanimated;
 
