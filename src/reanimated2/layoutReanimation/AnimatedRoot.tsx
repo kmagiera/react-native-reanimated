@@ -1,23 +1,6 @@
 /* global _stopObservingProgress, _startObservingProgress */
-import { Platform, requireNativeComponent } from 'react-native';
-import React from 'react';
 import { runOnUI } from '../core';
-import { withStyleAnimation } from '../animations';
-
-let REALayoutView: any;
-if (Platform.OS === 'web' && !requireNativeComponent) {
-  REALayoutView = React.Component;
-} else {
-  REALayoutView = (requireNativeComponent(
-    'REALayoutView'
-  ) as unknown) as React.Component;
-}
-
-export class AnimatedLayout extends React.Component {
-  render(): React.ReactElement {
-    return <REALayoutView collapsable={false} {...this.props} />;
-  }
-}
+import { withStyleAnimation } from '../animation/styleAnimation';
 
 // Register LayoutAnimationRepository
 
