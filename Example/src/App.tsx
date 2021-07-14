@@ -33,6 +33,7 @@ import AnimatedTabBarExample from './AnimatedTabBarExample';
 import LightboxExample from './LightboxExample';
 import LiquidSwipe from './LiquidSwipe';
 import ScrollExample from './AnimatedScrollExample';
+import AirbnbHeaderExample from './AirbnbHeaderExample';
 LogBox.ignoreLogs(['Calling `getNode()`']);
 
 type Screens = Record<string, { screen: React.ComponentType; title?: string }>;
@@ -125,6 +126,10 @@ const SCREENS: Screens = {
   ScrollExample: {
     screen: ScrollExample,
     title: 'Scroll Example',
+  },
+  AirbnbHeaderExample: {
+    screen: AirbnbHeaderExample,
+    title: 'Airbnb Header Example',
   },
 };
 
